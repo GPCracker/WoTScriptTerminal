@@ -1,0 +1,60 @@
+[
+	{
+		"id": "preferences",
+		"children": [
+			{
+				"caption": "Package Settings",
+				"mnemonic": "P",
+				"id": "package-settings",
+				"children": [
+					{
+						"caption": "WoT Script Terminal",
+						"children": [
+							{
+								"caption": "Settings - Default",
+								"command": "open_file",
+								"args": {
+									"file": "${packages}/WoTScriptTerminal/WoTScriptTerminal.sublime-settings"
+								}
+							},
+							{
+								"caption": "Settings - User",
+								"command": "open_file",
+								"args": {
+									"file": "${packages}/User/WoTScriptTerminal.sublime-settings"
+								}
+							}
+						]
+					}
+				]
+			}
+		]
+	},
+	{
+		"caption": "WoT Script Terminal",
+		"id": "script_terminal",
+		"children": [
+			{
+				"caption": "Connect to WoT",
+				"command": "script_terminal_connect"
+			},
+			{
+				"caption": "Disconnect from WoT",
+				"command": "script_terminal_disconnect"
+			},
+			{
+				"caption": "Create WoT log",
+				"command": "script_terminal_log_create"
+			},
+			{"caption": "-"},
+			{
+				"caption": "Execute script in WoT",
+				"command": "script_terminal_execute_all"
+			},
+			{
+				"caption": "Execute selected in WoT",
+				"command": "script_terminal_execute_selected"
+			}
+		]
+	}
+]

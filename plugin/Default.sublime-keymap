@@ -1,0 +1,10 @@
+[
+	{
+		"keys": ["shift+f5"],
+		"command": "script_terminal_execute_all"
+	},
+	{
+		"keys": ["ctrl+shift+f5"],
+		"command": "script_terminal_execute_selected"
+	}
+]

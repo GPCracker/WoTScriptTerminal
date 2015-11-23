@@ -1,0 +1,22 @@
+[
+	{
+		"caption": "Connect to WoT",
+		"command": "script_terminal_connect"
+	},
+	{
+		"caption": "Disconnect from WoT",
+		"command": "script_terminal_disconnect"
+	},
+	{
+		"caption": "Create WoT log",
+		"command": "script_terminal_log_create"
+	},
+	{
+		"caption": "Execute script in WoT",
+		"command": "script_terminal_execute_all"
+	},
+	{
+		"caption": "Execute selected in WoT",
+		"command": "script_terminal_execute_selected"
+	}
+]
