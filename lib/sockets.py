@@ -7,6 +7,8 @@ import struct
 import threading
 import traceback
 
+from .stream import SocketFileIO
+
 class ThreadCaller(object):
 	@staticmethod
 	def call_in_thread(group=None, target=None, name=None, args=(), kwargs=None, daemon=False):
@@ -288,8 +290,9 @@ class TCPStreamIO(object):
 		return
 
 	def stream_files_create(self):
-		self.rfile = io.open(self.fileno(), mode='rb', buffering=0, closefd=False)
-		self.wfile = io.open(self.fileno(), mode='wb', buffering=0, closefd=False)
+		self.rfile = self.wfile = SocketFileIO(self.socket)
+		#self.rfile = io.open(self.fileno(), mode='rb', buffering=0, closefd=False)
+		#self.wfile = io.open(self.fileno(), mode='wb', buffering=0, closefd=False)
 		return
 
 	def stream_files_remove(self):
