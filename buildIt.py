@@ -53,7 +53,7 @@ def processFile(src_file, dst_file_wot, dst_file_plugin, zip_file_wot, zip_file_
 		os.makedirs(os.path.dirname(dst_file_plugin))
 	with open(src_file, 'rt' if is_code else 'rb') as f:
 		source = f.read()
-	source = compileSource(source, src_file, os.path.getmtime(src_file)) if is_code else source
+	source = compileSource(source, os.path.basename(src_file), os.path.getmtime(src_file)) if is_code else source
 	if dst_file_wot is not None:
 		with open(dst_file_wot, 'wb') as f:
 			f.write(source)
