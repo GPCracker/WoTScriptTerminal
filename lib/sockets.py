@@ -162,14 +162,14 @@ class TCPStreamServer(ThreadCaller):
 
 	def request_error(self, request, client_address):
 		sys.stderr.write('-' * 40 + '\n')
-		sys.stderr.write('Socket exception occured during processing of request ({0!r}) from {1[0]}:{1[1]}'.format(request, client_address))
+		sys.stderr.write('Socket exception occured during processing of request ({0!r}) from {1[0]}:{1[1]}\n'.format(request, client_address))
 		traceback.print_exc()
 		sys.stderr.write('-' * 40 + '\n')
 		return
 
 	def handler_error(self, request, client_address):
 		sys.stderr.write('-' * 40 + '\n')
-		sys.stderr.write('Handler exception occured during processing of request ({0!r}) from {1[0]}:{1[1]}'.format(request, client_address))
+		sys.stderr.write('Handler exception occured during processing of request ({0!r}) from {1[0]}:{1[1]}\n'.format(request, client_address))
 		traceback.print_exc()
 		sys.stderr.write('-' * 40 + '\n')
 		return
@@ -180,8 +180,8 @@ class TCPStreamServer(ThreadCaller):
 class TCPStreamHandler(object):
 	disable_nagle_algorithm = False
 
-	def __init__(self, request, client_address, server):
-		self.request = request
+	def __init__(self, socket, client_address, server):
+		self.socket = socket
 		self.client_address = client_address
 		self.server = server
 		self.request_init()
@@ -192,11 +192,11 @@ class TCPStreamHandler(object):
 		return
 
 	def fileno(self):
-		return self.request.fileno() if self.request else None
+		return self.socket.fileno() if self.socket else None
 
 	def request_init(self):
 		if self.disable_nagle_algorithm:
-			self.request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
+			self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, True)
 		return
 
 	def request_fini(self):
