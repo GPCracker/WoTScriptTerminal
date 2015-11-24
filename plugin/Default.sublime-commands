@@ -8,15 +8,23 @@
 		"command": "script_terminal_disconnect"
 	},
 	{
-		"caption": "Create WoT log",
-		"command": "script_terminal_log_create"
-	},
-	{
 		"caption": "Execute script in WoT",
-		"command": "script_terminal_execute_all"
+		"command": "script_terminal_execute_script"
 	},
 	{
 		"caption": "Execute selected in WoT",
 		"command": "script_terminal_execute_selected"
+	},
+	{
+		"caption": "Create new WoT log file",
+		"command": "script_terminal_new_log_file"
+	},
+	{
+		"caption": "Show WoT log output panel",
+		"command": "script_terminal_show_log_output"
+	},
+	{
+		"caption": "Clear WoT logs",
+		"command": "script_terminal_clear_logs"
 	}
 ]

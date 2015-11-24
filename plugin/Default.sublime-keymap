@@ -1,7 +1,7 @@
 [
 	{
 		"keys": ["shift+f5"],
-		"command": "script_terminal_execute_all"
+		"command": "script_terminal_execute_script"
 	},
 	{
 		"keys": ["ctrl+shift+f5"],

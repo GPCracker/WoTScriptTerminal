@@ -1,4 +1,7 @@
 {
-	"host": "localhost",
-	"port": 9999
+	"server_host": "localhost",
+	"server_port": 9999,
+	"save_locals": true,
+	"new_logs_only": true,
+	"auto_show_output_panel": true
 }
