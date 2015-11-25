@@ -23,18 +23,12 @@ class TerminalClient(TCPStreamClient, TCPStreamIO, TCPFrameIO, ThreadCaller):
 	def print_start(self, writer = None):
 		return self.call_in_thread(target=self.print_loop, args=(self.reader, writer), kwargs={}, daemon=True)
 
-	def launch(self):
-		if not self.client_init() or not self.client_connect():
-			return False
-		self.stream_files_create()
+	def io_create(self):
 		self.reader = io.TextIOWrapper(io.BufferedReader(self.rfile, buffer_size=1), encoding=self.encoding, line_buffering=True)
-		return True
+		return
 
-	def terminate(self):
+	def io_remove(self):
 		self.reader = None
-		self.stream_files_remove()
-		self.client_disconnect()
-		self.client_fini()
 		return
 
 	def send_script(self, script):

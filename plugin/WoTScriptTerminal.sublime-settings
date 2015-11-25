@@ -3,5 +3,8 @@
 	"server_port": 9999,
 	"save_locals": true,
 	"new_logs_only": true,
+	"logs_clear_buffer": true,
+	"logs_clear_files": false,
+	"logs_clear_output": true,
 	"auto_show_output_panel": true
 }
