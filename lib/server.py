@@ -32,7 +32,7 @@ class StreamTee(object):
 		return result
 
 	def __callmethod__(self, name, *args, **kwargs):
-		result = getattr(self.target, name)(*args, **kwargs) if 'skipTarget' not in kwargs or not kwargs['skipTarget'] else None
+		result = getattr(self.target, name)(*args, **kwargs) if not kwargs.pop('skipTarget', False) else None
 		for stream in self.streams:
 			try:
 				getattr(stream, name)(*args, **kwargs)
