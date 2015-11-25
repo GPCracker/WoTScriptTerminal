@@ -1,3 +1,11 @@
+# *************************
+# Environment initialization
+# *************************
+target_globals = dict(globals())
+
+# *************************
+# Loader initialization
+# *************************
 import os, marshal
 
 class WriteProtectedDict(dict):
@@ -8,12 +16,24 @@ class WriteProtectedDict(dict):
 			super(WriteProtectedDict, self).__setitem__(key, value)
 		return
 
-module_globals = WriteProtectedDict({'_logLevel': 1})
+target_globals.update({'_logLevel': 1})
+target_globals = WriteProtectedDict(target_globals)
 
+# *************************
+# Loading original module
+# *************************
 original_file = os.path.normpath(os.path.join('res/', __file__)).replace(os.sep, '/')
 if not os.path.isfile(original_file):
 	raise IOError('Original file could not be found. Module loading impossible.')
 with open(original_file, 'rb') as f:
-	exec marshal.loads(f.read()[8:]) in module_globals
+	exec marshal.loads(f.read()[8:]) in target_globals
 
-(lambda module_globals: globals().clear() and globals.update(module_globals)).__call__(module_globals)
+# *************************
+# Replacing environment
+# *************************
+def replace_globals(source, target):
+	source.clear()
+	source.update(target)
+	return
+
+replace_globals(globals(), target_globals)
