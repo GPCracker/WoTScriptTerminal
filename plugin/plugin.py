@@ -268,6 +268,8 @@ class ScriptTerminalExecuteScriptCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		global terminal
 		script = self.view.substr(sublime.Region(0, self.view.size()))
+		if not script:
+			return
 		result = terminal.send_script(script)
 		message = 'Script sending to WoT client successful.' if result else 'Script sending to WoT client failed.'
 		sublime.status_message(message)
@@ -281,6 +283,8 @@ class ScriptTerminalExecuteSelectedCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		global terminal
 		script = ''.join(map(self.view.substr, self.view.sel()))
+		if not script:
+			return
 		result = terminal.send_script(script)
 		message = 'Script sending to WoT client successful.' if result else 'Script sending to WoT client failed.'
 		sublime.status_message(message)

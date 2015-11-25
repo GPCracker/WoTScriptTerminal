@@ -314,6 +314,8 @@ class TCPFrameIO(object):
 
 	def send_frame(self, binary_data):
 		try:
+			if not binary_data:
+				raise IOError('Sending empty frames is prohibited.')
 			self.wfile.write(struct.pack(self.frame_length_frmt, len(binary_data)))
 			self.wfile.write(binary_data)
 		except (socket.error, IOError):
