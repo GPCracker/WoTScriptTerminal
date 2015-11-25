@@ -220,13 +220,12 @@ class ScriptTerminalListener(sublime_plugin.EventListener):
 # *************************
 # Sublime Commands
 # *************************
-class ScriptTerminalConnectCommand(sublime_plugin.WindowCommand):
+class ScriptTerminalConnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
 		global terminal
 		result = terminal.connect()
-		message = 'Connected to {0[0]}:{0[1]}.' if result else 'Connect to {0[0]}:{0[1]} failed.'
-		server_address = terminal.settings['server_host'], terminal.settings['server_port']
-		sublime.status_message(message.format(server_address))
+		message = 'Connected to WoT client.' if result else 'Connect to WoT client failed.'
+		sublime.status_message(message)
 		if result and not terminal.log_is_active():
 			terminal.log_start()
 		return
@@ -235,12 +234,12 @@ class ScriptTerminalConnectCommand(sublime_plugin.WindowCommand):
 		global terminal
 		return terminal is not None and not terminal.is_connected()
 
-class ScriptTerminalDisconnectCommand(sublime_plugin.WindowCommand):
+class ScriptTerminalDisconnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self):
 		global terminal
 		terminal.disconnect()
-		message = 'Disconnected from {0[0]}:{0[1]}.'
-		sublime.status_message(message.format(terminal.client.server_address))
+		message = 'Disconnected from WoT client.'
+		sublime.status_message(message)
 		return
 
 	def is_enabled(self):
@@ -252,8 +251,8 @@ class ScriptTerminalExecuteScriptCommand(sublime_plugin.TextCommand):
 		global terminal
 		script = self.view.substr(sublime.Region(0, self.view.size()))
 		result = terminal.send_script(script)
-		message = 'Script sending to {0[0]}:{0[1]} successful.' if result else 'Script sending to {0[0]}:{0[1]} failed.'
-		sublime.status_message(message.format(terminal.client.server_address))
+		message = 'Script sending to WoT client successful.' if result else 'Script sending to WoT client failed.'
+		sublime.status_message(message)
 		return
 
 	def is_enabled(self):
@@ -265,8 +264,8 @@ class ScriptTerminalExecuteSelectedCommand(sublime_plugin.TextCommand):
 		global terminal
 		script = ''.join(map(self.view.substr, self.view.sel()))
 		result = terminal.send_script(script)
-		message = 'Script sending to {0[0]}:{0[1]} successful.' if result else 'Script sending to {0[0]}:{0[1]} failed.'
-		sublime.status_message(message.format(terminal.client.server_address))
+		message = 'Script sending to WoT client successful.' if result else 'Script sending to WoT client failed.'
+		sublime.status_message(message)
 		return
 
 	def is_enabled(self):
