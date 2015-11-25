@@ -119,8 +119,16 @@ class ScriptTerminal(object):
 		self.log_event -= self.log_update_views
 		return
 
-	def connect(self):
-		self.client = TerminalClient((self.settings['server_host'], self.settings['server_port']))
+	def connect(self, server_address=None):
+		server_address = server_address if server_address is not None else (self.settings['server_host'], self.settings['server_port'])
+		if isinstance(server_address, str):
+			try:
+				host, port = server_address.split(':')
+				port = int(port)
+				server_address = host, port
+			except:
+				return False
+		self.client = TerminalClient(server_address)
 		if self.client.client_init():
 			if self.client.client_connect():
 				self.client.stream_files_create()
@@ -221,9 +229,9 @@ class ScriptTerminalListener(sublime_plugin.EventListener):
 # Sublime Commands
 # *************************
 class ScriptTerminalConnectCommand(sublime_plugin.ApplicationCommand):
-	def run(self):
+	def run(self, server_address=None):
 		global terminal
-		result = terminal.connect()
+		result = terminal.connect(server_address)
 		message = 'Connected to WoT client.' if result else 'Connect to WoT client failed.'
 		sublime.status_message(message)
 		if result and not terminal.log_is_active():
