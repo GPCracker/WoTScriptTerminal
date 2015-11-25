@@ -48,23 +48,14 @@ BigWorld.logError = functools.partial(bwLogHook, BigWorld.logError)
 BigWorld.logCritical = functools.partial(bwLogHook, BigWorld.logCritical)
 BigWorld.logHack = functools.partial(bwLogHook, BigWorld.logHack)
 
-# *************************
-# debug_utils log hooks
-# *************************
-def new_init():
-	result = old_init()
-	debug_utils._g_logMapping.update({
-		'TRACE': BigWorld.logTrace,
-		'DEBUG': BigWorld.logDebug,
-		'INFO': BigWorld.logInfo,
-		'NOTE': BigWorld.logNotice,
-		'NOTICE': BigWorld.logNotice,
-		'WARNING': BigWorld.logWarning,
-		'ERROR': BigWorld.logError,
-		'CRITICAL': BigWorld.logCritical,
-		'HACK': BigWorld.logHack
-	})
-	return result
-
-old_init = debug_utils.init
-debug_utils.init = new_init
+debug_utils._g_logMapping.update({
+	'TRACE': BigWorld.logTrace,
+	'DEBUG': BigWorld.logDebug,
+	'INFO': BigWorld.logInfo,
+	'NOTE': BigWorld.logNotice,
+	'NOTICE': BigWorld.logNotice,
+	'WARNING': BigWorld.logWarning,
+	'ERROR': BigWorld.logError,
+	'CRITICAL': BigWorld.logCritical,
+	'HACK': BigWorld.logHack
+})
