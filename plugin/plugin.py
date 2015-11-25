@@ -228,6 +228,16 @@ class ScriptTerminalListener(sublime_plugin.EventListener):
 # *************************
 # Sublime Commands
 # *************************
+class ScriptTerminalConnectToCommand(sublime_plugin.WindowCommand):
+	def run(self):
+		on_input_done = lambda server_address: sublime.run_command('script_terminal_connect', {'server_address': server_address})
+		self.window.show_input_panel('WoT client address (HOST:PORT)', '', on_input_done, None, None)
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None and not terminal.is_connected()
+
 class ScriptTerminalConnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self, server_address=None):
 		global terminal

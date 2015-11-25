@@ -4,6 +4,10 @@
 		"command": "script_terminal_connect"
 	},
 	{
+		"caption": "Connect to WoT (custom address)",
+		"command": "script_terminal_connect_to"
+	},
+	{
 		"caption": "Disconnect from WoT",
 		"command": "script_terminal_disconnect"
 	},
