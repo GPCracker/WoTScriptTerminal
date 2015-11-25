@@ -12,7 +12,7 @@ import ResMgr
 # *************************
 # WoT Client
 # *************************
-# Nothing
+import debug_utils
 
 # *************************
 # WoT Client Hooks
@@ -47,3 +47,15 @@ BigWorld.logWarning = functools.partial(bwLogHook, BigWorld.logWarning)
 BigWorld.logError = functools.partial(bwLogHook, BigWorld.logError)
 BigWorld.logCritical = functools.partial(bwLogHook, BigWorld.logCritical)
 BigWorld.logHack = functools.partial(bwLogHook, BigWorld.logHack)
+
+debug_utils._g_logMapping.update({
+	'TRACE': BigWorld.logTrace,
+	'DEBUG': BigWorld.logDebug,
+	'INFO': BigWorld.logInfo,
+	'NOTE': BigWorld.logNotice,
+	'NOTICE': BigWorld.logNotice,
+	'WARNING': BigWorld.logWarning,
+	'ERROR': BigWorld.logError,
+	'CRITICAL': BigWorld.logCritical,
+	'HACK': BigWorld.logHack
+})
