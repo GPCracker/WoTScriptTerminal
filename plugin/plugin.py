@@ -289,7 +289,6 @@ class ScriptTerminalNewLogFileCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		global terminal
 		view = terminal.create_log_file(self.window, 'WoT Python Log', True, True)
-		print('new_file')
 		return
 
 	def is_enabled(self):
@@ -301,7 +300,6 @@ class ScriptTerminalShowLogOutputCommand(sublime_plugin.WindowCommand):
 		global terminal
 		view = terminal.create_log_output(self.window, 'wot_python_log', True)
 		self.window.run_command("show_panel", {"panel": 'output.' + 'wot_python_log'})
-		print('new_output')
 		return
 
 	def is_enabled(self):
@@ -316,7 +314,6 @@ class ScriptTerminalClearLogsCommand(sublime_plugin.ApplicationCommand):
 		for window_id, view_id, is_file in terminal.log_views:
 			if is_file and terminal.settings['logs_clear_files'] or not is_file and terminal.settings['logs_clear_output']:
 				sublime.View(view_id).run_command('script_terminal_log_message', {'string': '', 'clear': True})
-		print('logs_clear')
 		return
 
 	def is_enabled(self):
