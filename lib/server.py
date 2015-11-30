@@ -108,13 +108,20 @@ class TerminalHandler(TCPStreamHandler, TCPStreamIO, TCPFrameIO):
 		self.locals, self.locals.builtins = self.server.locals.setdefault(uuid, self.locals), self.locals.builtins
 		return
 
+	def service_fetch_logs(self):
+		self.writer.write(self.server.buffer.getvalue())
+		return
+
 	def request_intro(self):
 		self.stream_files_create()
 		self.writer = io.TextIOWrapper(io.BufferedWriter(self.wfile, buffer_size=1), encoding=self.encoding, line_buffering=True)
 		self.server.outtee.streams.add(self.writer)
 		self.server.errtee.streams.add(self.writer)
 		self.locals = TerminalLocals()
-		self.locals.builtins = {'update_locals': self.service_update_locals}
+		self.locals.builtins = {
+			'update_locals': self.service_update_locals,
+			'fetch_logs': self.service_fetch_logs
+		}
 		return
 
 	def request_serve(self):
