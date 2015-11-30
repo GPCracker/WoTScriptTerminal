@@ -68,6 +68,7 @@ class ScriptTerminal(object):
 	defaults = {
 		'server_host': 'localhost',
 		'server_port': 9000,
+		'save_locals': True,
 		'new_logs_only': True,
 		'logs_clear_buffer': True,
 		'logs_clear_files': False,
