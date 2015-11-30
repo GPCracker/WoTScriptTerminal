@@ -53,6 +53,7 @@ class TerminalServer(TCPStreamServer):
 	daemon_threads = True
 
 	def setup(self):
+		self.locals = dict()
 		self.outtee = StreamTee(sys.stdout)
 		self.errtee = StreamTee(sys.stderr)
 		self.outtee.install(sys, 'stdout', False)
@@ -64,6 +65,7 @@ class TerminalServer(TCPStreamServer):
 		self.errtee.remove(sys, 'stderr', True)
 		self.outtee = None
 		self.errtee = None
+		self.locals = None
 		return
 
 	def launch(self):
@@ -78,18 +80,38 @@ class TerminalServer(TCPStreamServer):
 		self.server_fini()
 		return
 
+class TerminalLocals(dict):
+	@property
+	def builtins(self):
+		if not hasattr(self, '_builtins') or self._builtins is None:
+			self._builtins = dict()
+		return self._builtins
+
+	@builtins.setter
+	def builtins(self, value):
+		self._builtins = value
+		return
+
+	def __missing__(self, key):
+		return self.builtins[key]
+
 class TerminalHandler(TCPStreamHandler, TCPStreamIO, TCPFrameIO):
 	encoding = 'utf-8'
+
+	def service_update_locals(self, uuid):
+		self.locals, self.locals.builtins = self.server.locals.setdefault(uuid, self.locals), self.locals.builtins
+		return
 
 	def request_intro(self):
 		self.stream_files_create()
 		self.writer = io.TextIOWrapper(io.BufferedWriter(self.wfile, buffer_size=1), encoding=self.encoding, line_buffering=True)
 		self.server.outtee.streams.add(self.writer)
 		self.server.errtee.streams.add(self.writer)
+		self.locals = TerminalLocals()
+		self.locals.builtins = {'update_locals': self.service_update_locals}
 		return
 
 	def request_serve(self):
-		locals = dict()
 		filename = '{0[0]}:{0[1]}'.format(self.client_address)
 		while True:
 			binary_data = self.recv_frame()
@@ -98,7 +120,7 @@ class TerminalHandler(TCPStreamHandler, TCPStreamIO, TCPFrameIO):
 			script = binary_data.decode(self.encoding)
 			linecache.cache[filename] = None, None, map(lambda line: line + '\n', script.split('\n')), None
 			try:
-				exec(compile(script, filename, 'exec'), locals)
+				exec(compile(script, filename, 'exec'), self.locals)
 			except:
 				try:
 					exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -109,6 +131,8 @@ class TerminalHandler(TCPStreamHandler, TCPStreamIO, TCPFrameIO):
 		return
 
 	def request_outro(self):
+		self.locals.builtins = None
+		self.locals = None
 		self.server.outtee.streams.discard(self.writer)
 		self.server.errtee.streams.discard(self.writer)
 		self.writer = None
