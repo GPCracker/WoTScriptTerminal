@@ -54,8 +54,11 @@ class TerminalServer(TCPStreamServer):
 
 	def setup(self):
 		self.locals = dict()
+		self.buffer = io.StringIO()
 		self.outtee = StreamTee(sys.stdout)
 		self.errtee = StreamTee(sys.stderr)
+		self.outtee.streams.add(self.buffer)
+		self.errtee.streams.add(self.buffer)
 		self.outtee.install(sys, 'stdout', False)
 		self.errtee.install(sys, 'stderr', False)
 		return
@@ -63,8 +66,11 @@ class TerminalServer(TCPStreamServer):
 	def cleanup(self):
 		self.outtee.remove(sys, 'stdout', True)
 		self.errtee.remove(sys, 'stderr', True)
+		self.outtee.streams.discard(self.buffer)
+		self.errtee.streams.discard(self.buffer)
 		self.outtee = None
 		self.errtee = None
+		self.buffer = None
 		self.locals = None
 		return
 
