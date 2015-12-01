@@ -71,7 +71,6 @@ class ScriptTerminal(object):
 		'server_port': 9000,
 		'save_locals': True,
 		'fetch_logs': True,
-		'new_logs_only': True,
 		'auto_show_output_panel': True
 	}
 
@@ -101,10 +100,10 @@ class ScriptTerminal(object):
 
 	def __init__(self, settings):
 		self.client = None
-		self.log_views = set()
+		self.log_views = dict()
+		self.log_thread = None
 		self.log_event = Event()
 		self.settings = settings
-		self.log_thread = None
 		self.uuid = str(uuid.uuid4())
 		self.log_buffer = io.StringIO()
 		return
@@ -119,15 +118,7 @@ class ScriptTerminal(object):
 		self.log_event -= self.log_update_views
 		return
 
-	def connect(self, server_address=None):
-		server_address = server_address if server_address is not None else (self.settings['server_host'], self.settings['server_port'])
-		if isinstance(server_address, str):
-			try:
-				host, port = server_address.split(':')
-				port = int(port)
-				server_address = host, port
-			except:
-				return False
+	def connect(self, server_address):
 		self.client = TerminalClient(server_address)
 		if self.client.client_init():
 			if self.client.client_connect():
@@ -175,8 +166,8 @@ class ScriptTerminal(object):
 		if self.settings['auto_show_output_panel']:
 			self.create_log_output(sublime.active_window(), 'wot_python_log', True)
 			sublime.active_window().run_command('show_panel', {'panel': 'output.' + 'wot_python_log'})
-		for window_id, view_id, is_file in self.log_views:
-			sublime.View(view_id).run_command('script_terminal_log_message', {'string': string})
+		for view_id in self.log_views.keys():
+			sublime.View(view_id).run_command('script_terminal_update_log_view', {'string': string})
 		return
 
 	def log_start(self):
@@ -204,20 +195,16 @@ class ScriptTerminal(object):
 
 	def create_log_file(self, window, name, scratch=False, read_only=False):
 		view = self.create_file_view(window, name, scratch, read_only)
-		self.log_views.add((window.id(), view.id(), True))
-		if not self.settings['new_logs_only'] and view.size() == 0:
-			view.run_command('script_terminal_log_message', {'string': self.buffered_logs_get()})
+		self.log_views[view.id()] = None
 		return view
 
 	def create_log_output(self, window, name, read_only=False):
-		for window_id, view_id, is_file in self.log_views:
-			if window.id() == window_id and not is_file:
+		for view_id, window_id in self.log_views.items():
+			if window.id() == window_id != None:
 				return sublime.View(view_id)
 		view = window.create_output_panel(name)
 		view.set_read_only(read_only)
-		self.log_views.add((window.id(), view.id(), False))
-		if not self.settings['new_logs_only'] and view.size() == 0:
-			view.run_command('script_terminal_log_message', {'string': self.buffered_logs_get()})
+		self.log_views[view.id()] = window.id()
 		return view
 
 # *************************
@@ -227,26 +214,17 @@ class ScriptTerminalListener(sublime_plugin.EventListener):
 	def on_pre_close(self, view):
 		global terminal
 		if terminal is not None:
-			terminal.log_views.discard((view.window().id(), view.id(), True))
-			terminal.log_views.discard((view.window().id(), view.id(), False))
+			terminal.log_views.pop(view.id(), None)
 		return
 
 # *************************
 # Sublime Commands
 # *************************
-class ScriptTerminalConnectToCommand(sublime_plugin.WindowCommand):
-	def run(self):
-		on_input_done = lambda server_address: sublime.run_command('script_terminal_connect', {'server_address': server_address})
-		self.window.show_input_panel('WoT client address (HOST:PORT)', '', on_input_done, None, None)
-		return
-
-	def is_enabled(self):
-		global terminal
-		return terminal is not None and not terminal.is_connected()
-
 class ScriptTerminalConnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self, server_address=None):
 		global terminal
+		if server_address is None:
+			server_address = terminal.settings['server_host'], terminal.settings['server_port']
 		result = terminal.connect(server_address)
 		message = 'Connected to WoT client.' if result else 'Connect to WoT client failed.'
 		sublime.status_message(message)
@@ -304,7 +282,7 @@ class ScriptTerminalExecuteSelectedCommand(sublime_plugin.TextCommand):
 		global terminal
 		return terminal is not None and terminal.is_connected()
 
-class ScriptTerminalLogMessageCommand(sublime_plugin.TextCommand):
+class ScriptTerminalUpdateLogViewCommand(sublime_plugin.TextCommand):
 	def run(self, edit, string):
 		global terminal
 		terminal.view_append_string(self.view, edit, string)
@@ -312,9 +290,9 @@ class ScriptTerminalLogMessageCommand(sublime_plugin.TextCommand):
 
 	def is_enabled(self):
 		global terminal
-		return terminal is not None and bool(terminal.log_views)
+		return terminal is not None and self.view.id() in terminal.log_views
 
-class ScriptTerminalLogClearCommand(sublime_plugin.TextCommand):
+class ScriptTerminalClearLogViewCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		global terminal
 		terminal.view_clear(self.view, edit)
@@ -322,9 +300,20 @@ class ScriptTerminalLogClearCommand(sublime_plugin.TextCommand):
 
 	def is_enabled(self):
 		global terminal
-		return terminal is not None and bool(terminal.log_views)
+		return terminal is not None and self.view.id() in terminal.log_views
 
 class ScriptTerminalNewLogFileCommand(sublime_plugin.WindowCommand):
+	def run(self):
+		global terminal
+		view = terminal.create_log_file(self.window, 'WoT Python Log', True, True)
+		view.run_command('script_terminal_update_log_view', {'string': terminal.buffered_logs_get()})
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None
+
+class ScriptTerminalEmptyLogFileCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		global terminal
 		view = terminal.create_log_file(self.window, 'WoT Python Log', True, True)
@@ -333,6 +322,16 @@ class ScriptTerminalNewLogFileCommand(sublime_plugin.WindowCommand):
 	def is_enabled(self):
 		global terminal
 		return terminal is not None
+
+class ScriptTerminalClearLogFileCommand(sublime_plugin.WindowCommand):
+	def run(self):
+		view = self.window.active_view()
+		view.run_command('script_terminal_clear_log_view')
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None and self.window.active_view().id() in terminal.log_views
 
 class ScriptTerminalShowLogOutputCommand(sublime_plugin.WindowCommand):
 	def run(self):
@@ -345,21 +344,21 @@ class ScriptTerminalShowLogOutputCommand(sublime_plugin.WindowCommand):
 		global terminal
 		return terminal is not None
 
-class ScriptTerminalClearLogFileCommand(sublime_plugin.WindowCommand):
-	def run(self):
-		view = self.window.active_view()
-		view.run_command('script_terminal_log_clear')
-		return
-
-	def is_enabled(self):
-		global terminal
-		return terminal is not None and self.window.active_view().id() in map(lambda entry: entry[1], terminal.log_views)
-
 class ScriptTerminalClearLogOutputCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		global terminal
 		view = terminal.create_log_output(self.window, 'wot_python_log', True)
-		view.run_command('script_terminal_log_clear')
+		view.run_command('script_terminal_clear_log_view')
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None
+
+class ScriptTerminalClearLogBufferCommand(sublime_plugin.ApplicationCommand):
+	def run(self):
+		global terminal
+		terminal.buffered_logs_clear()
 		return
 
 	def is_enabled(self):

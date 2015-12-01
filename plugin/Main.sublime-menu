@@ -39,10 +39,6 @@
 				"command": "script_terminal_connect"
 			},
 			{
-				"caption": "Connect to WoT (custom address)",
-				"command": "script_terminal_connect_to"
-			},
-			{
 				"caption": "Disconnect from WoT",
 				"command": "script_terminal_disconnect"
 			},
@@ -50,6 +46,10 @@
 			{
 				"caption": "Create new log file",
 				"command": "script_terminal_new_log_file"
+			},
+			{
+				"caption": "Create empty log file",
+				"command": "script_terminal_empty_log_file"
 			},
 			{
 				"caption": "Clear log file",
@@ -62,6 +62,10 @@
 			{
 				"caption": "Clear log output panel",
 				"command": "script_terminal_clear_log_output"
+			},
+			{
+				"caption": "Clear log buffer",
+				"command": "script_terminal_clear_log_buffer"
 			},
 			{"caption": "-"},
 			{

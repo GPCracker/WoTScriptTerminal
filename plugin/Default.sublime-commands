@@ -4,10 +4,6 @@
 		"command": "script_terminal_connect"
 	},
 	{
-		"caption": "Connect to WoT (custom address)",
-		"command": "script_terminal_connect_to"
-	},
-	{
 		"caption": "Disconnect from WoT",
 		"command": "script_terminal_disconnect"
 	},
@@ -24,15 +20,23 @@
 		"command": "script_terminal_new_log_file"
 	},
 	{
-		"caption": "Show WoT log output panel",
-		"command": "script_terminal_show_log_output"
+		"caption": "Create empty WoT log file",
+		"command": "script_terminal_empty_log_file"
 	},
 	{
 		"caption": "Clear WoT log file",
 		"command": "script_terminal_clear_log_file"
 	},
 	{
+		"caption": "Show WoT log output panel",
+		"command": "script_terminal_show_log_output"
+	},
+	{
 		"caption": "Clear WoT log output panel",
 		"command": "script_terminal_clear_log_output"
+	},
+	{
+		"caption": "Clear WoT log buffer",
+		"command": "script_terminal_clear_log_buffer"
 	}
 ]
