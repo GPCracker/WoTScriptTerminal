@@ -3,5 +3,5 @@
 	"server_port": 9999,
 	"save_locals": true,
 	"fetch_logs": true,
-	"auto_show_output_panel": true
+	"show_output": true
 }

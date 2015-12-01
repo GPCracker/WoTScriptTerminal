@@ -27,7 +27,7 @@ terminal = None
 # *************************
 def plugin_loaded():
 	global terminal
-	terminal = ScriptTerminal(Settings(sublime.load_settings('WoTScriptTerminal.sublime-settings'), ScriptTerminal.defaults))
+	terminal = ScriptTerminal(Settings('WoTScriptTerminal.sublime-settings', ScriptTerminal.defaults))
 	terminal.register_events()
 	return
 
@@ -51,9 +51,22 @@ class LogWriter(object):
 		return self.write_func(string)
 
 class Settings(dict):
-	def __init__(self, settings, *args, **kwargs):
-		self.settings = settings
+	@classmethod
+	def load_settings(sclass, base_name):
+		return sublime.load_settings(base_name)
+
+	@classmethod
+	def save_settings(sclass, base_name):
+		return sublime.save_settings(base_name)
+
+	def __init__(self, base_name, *args, **kwargs):
+		self.base_name = base_name
+		self.settings = self.load_settings(base_name)
 		super(Settings, self).__init__(*args, **kwargs)
+		return
+
+	def save(self):
+		self.save_settings(self.base_name)
 		return
 
 	def __getitem__(self, key):
@@ -71,7 +84,7 @@ class ScriptTerminal(object):
 		'server_port': 9000,
 		'save_locals': True,
 		'fetch_logs': True,
-		'auto_show_output_panel': True
+		'show_output': True
 	}
 
 	@staticmethod
@@ -163,7 +176,7 @@ class ScriptTerminal(object):
 		return self.log_buffer.write(string)
 
 	def log_update_views(self, string):
-		if self.settings['auto_show_output_panel']:
+		if self.settings['show_output']:
 			self.create_log_output(sublime.active_window(), 'wot_python_log', True)
 			sublime.active_window().run_command('show_panel', {'panel': 'output.' + 'wot_python_log'})
 		for view_id in self.log_views.keys():
@@ -364,3 +377,51 @@ class ScriptTerminalClearLogBufferCommand(sublime_plugin.ApplicationCommand):
 	def is_enabled(self):
 		global terminal
 		return terminal is not None
+
+# *************************
+# Sublime Settings Commands
+# *************************
+class ScriptTerminalToggleSaveLocalsCommand(sublime_plugin.ApplicationCommand):
+	def run(self):
+		global terminal
+		terminal.settings['save_locals'] = not terminal.settings['save_locals']
+		terminal.settings.save()
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None
+
+	def is_checked(self):
+		global terminal
+		return terminal is not None and terminal.settings['save_locals']
+
+class ScriptTerminalToggleFetchLogsCommand(sublime_plugin.ApplicationCommand):
+	def run(self):
+		global terminal
+		terminal.settings['fetch_logs'] = not terminal.settings['fetch_logs']
+		terminal.settings.save()
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None
+
+	def is_checked(self):
+		global terminal
+		return terminal is not None and terminal.settings['fetch_logs']
+
+class ScriptTerminalToggleShowOutputCommand(sublime_plugin.ApplicationCommand):
+	def run(self):
+		global terminal
+		terminal.settings['show_output'] = not terminal.settings['show_output']
+		terminal.settings.save()
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None
+
+	def is_checked(self):
+		global terminal
+		return terminal is not None and terminal.settings['show_output']

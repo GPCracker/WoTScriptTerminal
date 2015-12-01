@@ -75,6 +75,22 @@
 			{
 				"caption": "Execute selected in WoT",
 				"command": "script_terminal_execute_selected"
+			},
+			{"caption": "-"},
+			{
+				"caption": "Save script locals",
+				"command": "script_terminal_toggle_save_locals",
+				"checkbox": true
+			},
+			{
+				"caption": "Fetch logs on connect",
+				"command": "script_terminal_toggle_fetch_logs",
+				"checkbox": true
+			},
+			{
+				"caption": "Show output panel on new logs",
+				"command": "script_terminal_toggle_show_output",
+				"checkbox": true
 			}
 		]
 	}

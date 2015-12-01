@@ -38,5 +38,17 @@
 	{
 		"caption": "Clear WoT log buffer",
 		"command": "script_terminal_clear_log_buffer"
+	},
+	{
+		"caption": "Toggle save WoT script locals",
+		"command": "script_terminal_toggle_save_locals"
+	},
+	{
+		"caption": "Toggle fetch WoT logs on connect",
+		"command": "script_terminal_toggle_fetch_logs"
+	},
+	{
+		"caption": "Toggle show output panel on new WoT logs",
+		"command": "script_terminal_toggle_show_output"
 	}
 ]
