@@ -131,7 +131,7 @@ class TerminalHandler(TCPStreamHandler, TCPStreamIO, TCPFrameIO):
 			if not binary_data:
 				break
 			script = binary_data.decode(self.encoding)
-			linecache.cache[filename] = None, None, map(lambda line: line + '\n', script.split('\n')), None
+			linecache.cache[filename] = None, None, list(map(lambda line: line + '\n', script.split('\n'))), None
 			try:
 				exec(compile(script, filename, 'exec'), self.locals)
 			except:
