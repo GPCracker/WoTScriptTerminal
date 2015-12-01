@@ -2,6 +2,7 @@
 # Python 3
 # *************************
 import io
+import uuid
 import functools
 
 # *************************
@@ -69,6 +70,7 @@ class ScriptTerminal(object):
 		'server_host': 'localhost',
 		'server_port': 9000,
 		'save_locals': True,
+		'fetch_logs': True,
 		'new_logs_only': True,
 		'logs_clear_buffer': True,
 		'logs_clear_files': False,
@@ -106,6 +108,7 @@ class ScriptTerminal(object):
 		self.log_event = Event()
 		self.settings = settings
 		self.log_thread = None
+		self.uuid = str(uuid.uuid4())
 		self.log_buffer = io.StringIO()
 		return
 
@@ -244,8 +247,13 @@ class ScriptTerminalConnectCommand(sublime_plugin.ApplicationCommand):
 		result = terminal.connect(server_address)
 		message = 'Connected to WoT client.' if result else 'Connect to WoT client failed.'
 		sublime.status_message(message)
-		if result and not terminal.log_is_active():
-			terminal.log_start()
+		if result:
+			if not terminal.log_is_active():
+				terminal.log_start()
+			if terminal.settings['fetch_logs']:
+				terminal.send_script('fetch_logs();')
+			if terminal.settings['save_locals']:
+				terminal.send_script('update_locals({!r})'.format(terminal.uuid))
 		return
 
 	def is_enabled(self):

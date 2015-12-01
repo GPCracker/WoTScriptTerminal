@@ -2,6 +2,7 @@
 	"server_host": "localhost",
 	"server_port": 9999,
 	"save_locals": true,
+	"fetch_logs": true,
 	"new_logs_only": true,
 	"logs_clear_buffer": true,
 	"logs_clear_files": false,
