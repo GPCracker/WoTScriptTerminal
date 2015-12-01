@@ -28,7 +28,11 @@
 		"command": "script_terminal_show_log_output"
 	},
 	{
-		"caption": "Clear WoT logs",
-		"command": "script_terminal_clear_logs"
+		"caption": "Clear WoT log file",
+		"command": "script_terminal_clear_log_file"
+	},
+	{
+		"caption": "Clear WoT log output panel",
+		"command": "script_terminal_clear_log_output"
 	}
 ]

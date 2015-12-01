@@ -52,12 +52,16 @@
 				"command": "script_terminal_new_log_file"
 			},
 			{
+				"caption": "Clear log file",
+				"command": "script_terminal_clear_log_file"
+			},
+			{
 				"caption": "Show log output panel",
 				"command": "script_terminal_show_log_output"
 			},
 			{
-				"caption": "Clear logs",
-				"command": "script_terminal_clear_logs"
+				"caption": "Clear log output panel",
+				"command": "script_terminal_clear_log_output"
 			},
 			{"caption": "-"},
 			{

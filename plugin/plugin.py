@@ -72,9 +72,6 @@ class ScriptTerminal(object):
 		'save_locals': True,
 		'fetch_logs': True,
 		'new_logs_only': True,
-		'logs_clear_buffer': True,
-		'logs_clear_files': False,
-		'logs_clear_output': True,
 		'auto_show_output_panel': True
 	}
 
@@ -177,7 +174,7 @@ class ScriptTerminal(object):
 	def log_update_views(self, string):
 		if self.settings['auto_show_output_panel']:
 			self.create_log_output(sublime.active_window(), 'wot_python_log', True)
-			sublime.active_window().run_command("show_panel", {"panel": 'output.' + 'wot_python_log'})
+			sublime.active_window().run_command('show_panel', {'panel': 'output.' + 'wot_python_log'})
 		for window_id, view_id, is_file in self.log_views:
 			sublime.View(view_id).run_command('script_terminal_log_message', {'string': string})
 		return
@@ -192,10 +189,16 @@ class ScriptTerminal(object):
 	def send_script(self, script):
 		return self.client.send_script(script)
 
-	def get_logs(self):
+	def fetch_logs(self):
+		return self.send_script('fetch_logs();')
+
+	def save_locals(self):
+		return self.send_script('update_locals({!r})'.format(self.uuid))
+
+	def buffered_logs_get(self):
 		return self.log_buffer.getvalue()
 
-	def clear_logs(self):
+	def buffered_logs_clear(self):
 		self.log_buffer = io.StringIO()
 		return
 
@@ -203,7 +206,7 @@ class ScriptTerminal(object):
 		view = self.create_file_view(window, name, scratch, read_only)
 		self.log_views.add((window.id(), view.id(), True))
 		if not self.settings['new_logs_only'] and view.size() == 0:
-			view.run_command('script_terminal_log_message', {'string': self.get_logs()})
+			view.run_command('script_terminal_log_message', {'string': self.buffered_logs_get()})
 		return view
 
 	def create_log_output(self, window, name, read_only=False):
@@ -214,7 +217,7 @@ class ScriptTerminal(object):
 		view.set_read_only(read_only)
 		self.log_views.add((window.id(), view.id(), False))
 		if not self.settings['new_logs_only'] and view.size() == 0:
-			view.run_command('script_terminal_log_message', {'string': self.get_logs()})
+			view.run_command('script_terminal_log_message', {'string': self.buffered_logs_get()})
 		return view
 
 # *************************
@@ -247,13 +250,12 @@ class ScriptTerminalConnectCommand(sublime_plugin.ApplicationCommand):
 		result = terminal.connect(server_address)
 		message = 'Connected to WoT client.' if result else 'Connect to WoT client failed.'
 		sublime.status_message(message)
-		if result:
-			if not terminal.log_is_active():
-				terminal.log_start()
-			if terminal.settings['fetch_logs']:
-				terminal.send_script('fetch_logs();')
-			if terminal.settings['save_locals']:
-				terminal.send_script('update_locals({!r})'.format(terminal.uuid))
+		if result and not terminal.log_is_active():
+			terminal.log_start()
+		if result and terminal.settings['fetch_logs']:
+			terminal.fetch_logs()
+		if result and terminal.settings['save_locals']:
+			terminal.save_locals()
 		return
 
 	def is_enabled(self):
@@ -303,11 +305,19 @@ class ScriptTerminalExecuteSelectedCommand(sublime_plugin.TextCommand):
 		return terminal is not None and terminal.is_connected()
 
 class ScriptTerminalLogMessageCommand(sublime_plugin.TextCommand):
-	def run(self, edit, string, clear=False):
+	def run(self, edit, string):
 		global terminal
-		if clear:
-			terminal.view_clear(self.view, edit)
 		terminal.view_append_string(self.view, edit, string)
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None and bool(terminal.log_views)
+
+class ScriptTerminalLogClearCommand(sublime_plugin.TextCommand):
+	def run(self, edit):
+		global terminal
+		terminal.view_clear(self.view, edit)
 		return
 
 	def is_enabled(self):
@@ -328,21 +338,28 @@ class ScriptTerminalShowLogOutputCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		global terminal
 		view = terminal.create_log_output(self.window, 'wot_python_log', True)
-		self.window.run_command("show_panel", {"panel": 'output.' + 'wot_python_log'})
+		self.window.run_command('show_panel', {'panel': 'output.' + 'wot_python_log'})
 		return
 
 	def is_enabled(self):
 		global terminal
 		return terminal is not None
 
-class ScriptTerminalClearLogsCommand(sublime_plugin.ApplicationCommand):
+class ScriptTerminalClearLogFileCommand(sublime_plugin.WindowCommand):
+	def run(self):
+		view = self.window.active_view()
+		view.run_command('script_terminal_log_clear')
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None and self.window.active_view().id() in map(lambda entry: entry[1], terminal.log_views)
+
+class ScriptTerminalClearLogOutputCommand(sublime_plugin.WindowCommand):
 	def run(self):
 		global terminal
-		if terminal.settings['logs_clear_buffer']:
-			terminal.clear_logs()
-		for window_id, view_id, is_file in terminal.log_views:
-			if is_file and terminal.settings['logs_clear_files'] or not is_file and terminal.settings['logs_clear_output']:
-				sublime.View(view_id).run_command('script_terminal_log_message', {'string': '', 'clear': True})
+		view = terminal.create_log_output(self.window, 'wot_python_log', True)
+		view.run_command('script_terminal_log_clear')
 		return
 
 	def is_enabled(self):
