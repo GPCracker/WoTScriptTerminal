@@ -6,3 +6,5 @@ release/
 temp/
 # Excluding Python compiled files
 *.pyc
+# Excluding topic
+topic/
