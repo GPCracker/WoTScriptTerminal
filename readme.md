@@ -7,4 +7,4 @@ You can allow access from remote computer, changing server address from "localho
 
 ## Updating, Bugs, Errors, Discussion
 
-Author tries to update repository as soon as possible, but if you need it "just now" or you want to use it on specific game client version, you can modify it by yourself. Feature request and bug report could be made in [official topic]().
+Author tries to update repository as soon as possible, but if you need it "just now" or you want to use it on specific game client version, you can modify it by yourself. Feature request and bug report could be made in [official topic](http://www.koreanrandom.com/forum/topic/28509-wot-script-terminal-отладка-python-скриптов-для-wot-в-sublime-text-3/).
