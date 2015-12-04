@@ -2,9 +2,9 @@
 build/
 # Excluding release
 release/
+# Excluding topic
+topic/
 # Excluding temp
 temp/
 # Excluding Python compiled files
 *.pyc
-# Excluding topic
-topic/

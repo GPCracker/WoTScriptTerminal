@@ -4,18 +4,9 @@
 target_globals = dict(globals())
 
 # *************************
-# Loader initialization
+# Loading WoTScriptTerminal
 # *************************
-class WriteProtectedDict(dict):
-	protected_keys = set(['_logLevel'])
-
-	def __setitem__(self, key, value):
-		if key not in self.protected_keys:
-			super(WriteProtectedDict, self).__setitem__(key, value)
-		return
-
-target_globals.update({'_logLevel': 1})
-target_globals = WriteProtectedDict(target_globals)
+import WoTScriptTerminalLoader
 
 # *************************
 # Loading original module
