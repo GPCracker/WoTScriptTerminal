@@ -3,6 +3,7 @@ import os
 import imp
 import json
 import time
+import shutil
 import struct
 import marshal
 import zipfile
@@ -75,10 +76,12 @@ if __name__ == '__main__':
 		build_path = config["build_path"]
 		release_path = config["release_path"]
 		sources = config["sources"]
-		if not os.path.isdir(build_path):
-			os.makedirs(build_path)
-		if not os.path.isdir(release_path):
-			os.makedirs(release_path)
+		if os.path.isdir(build_path):
+			shutil.rmtree(build_path)
+		if os.path.isdir(release_path):
+			shutil.rmtree(release_path)
+		os.makedirs(build_path)
+		os.makedirs(release_path)
 		with zipfile.ZipFile(joinPath(release_path, application + '.zip'), 'w', zipfile.ZIP_DEFLATED) as fzip_wot, zipfile.ZipFile(joinPath(release_path, application + '.sublime-package'), 'w', zipfile.ZIP_DEFLATED) as fzip_plugin:
 			for src_file, dst_file_wot, dst_file_plugin, zip_file_wot, zip_file_plugin, is_code in sourceIterator(sources, build_path):
 				processFile(src_file, dst_file_wot, dst_file_plugin, zip_file_wot, zip_file_plugin, fzip_wot, fzip_plugin, is_code)
