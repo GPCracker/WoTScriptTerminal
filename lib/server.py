@@ -40,7 +40,9 @@ class StreamTee(object):
 				try:
 					getattr(stream, name)(*[unicode(item) for item in args], **{key: unicode(value) for key, value in kwargs.items()})
 				except:
+					self.target.write('-' * 40 + '\n')
 					self.target.write(traceback.format_exc())
+					self.target.write('-' * 40 + '\n')
 			except:
 				self.target.write(traceback.format_exc())
 		return result
