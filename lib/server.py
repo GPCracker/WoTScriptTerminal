@@ -3,6 +3,7 @@ import sys
 import types
 import functools
 import linecache
+import threading
 import traceback
 
 from .sockets import TCPStreamServer, TCPStreamHandler, TCPStreamIO, TCPFrameIO
@@ -10,6 +11,7 @@ from .sockets import TCPStreamServer, TCPStreamHandler, TCPStreamIO, TCPFrameIO
 class StreamTee(object):
 	def __init__(self, target, streams=None):
 		self.target = target
+		self.lock = threading.Lock()
 		self.streams = streams if streams is not None else set()
 		return
 
@@ -25,6 +27,18 @@ class StreamTee(object):
 		setattr(object, property, self.target)
 		return
 
+	def add(self, stream):
+		self.lock.acquire()
+		self.streams.add(stream)
+		self.lock.release()
+		return
+
+	def discard(self, stream):
+		self.lock.acquire()
+		self.streams.discard(stream)
+		self.lock.release()
+		return
+
 	def __getattr__(self, name):
 		result = getattr(self.target, name)
 		if hasattr(result, '__call__'):
@@ -33,6 +47,7 @@ class StreamTee(object):
 
 	def __callmethod__(self, name, *args, **kwargs):
 		result = getattr(self.target, name)(*args, **kwargs) if not kwargs.pop('skipTarget', False) else None
+		self.lock.acquire()
 		for stream in self.streams:
 			try:
 				getattr(stream, name)(*args, **kwargs)
@@ -45,6 +60,7 @@ class StreamTee(object):
 					self.target.write('-' * 40 + '\n')
 			except:
 				self.target.write(traceback.format_exc())
+		self.lock.release()
 		return result
 
 	def __del__(self):
@@ -59,8 +75,8 @@ class TerminalServer(TCPStreamServer):
 		self.buffer = io.StringIO()
 		self.outtee = StreamTee(sys.stdout)
 		self.errtee = StreamTee(sys.stderr)
-		self.outtee.streams.add(self.buffer)
-		self.errtee.streams.add(self.buffer)
+		self.outtee.add(self.buffer)
+		self.errtee.add(self.buffer)
 		self.outtee.install(sys, 'stdout', False)
 		self.errtee.install(sys, 'stderr', False)
 		return
@@ -68,8 +84,8 @@ class TerminalServer(TCPStreamServer):
 	def cleanup(self):
 		self.outtee.remove(sys, 'stdout', True)
 		self.errtee.remove(sys, 'stderr', True)
-		self.outtee.streams.discard(self.buffer)
-		self.errtee.streams.discard(self.buffer)
+		self.outtee.discard(self.buffer)
+		self.errtee.discard(self.buffer)
 		self.outtee = None
 		self.errtee = None
 		self.buffer = None
@@ -117,8 +133,8 @@ class TerminalHandler(TCPStreamHandler, TCPStreamIO, TCPFrameIO):
 	def request_intro(self):
 		self.stream_files_create()
 		self.writer = io.TextIOWrapper(io.BufferedWriter(self.wfile, buffer_size=1), encoding=self.encoding, line_buffering=True)
-		self.server.outtee.streams.add(self.writer)
-		self.server.errtee.streams.add(self.writer)
+		self.server.outtee.add(self.writer)
+		self.server.errtee.add(self.writer)
 		self.locals = TerminalLocals()
 		self.locals.builtins = {
 			'update_locals': self.service_update_locals,
@@ -148,8 +164,8 @@ class TerminalHandler(TCPStreamHandler, TCPStreamIO, TCPFrameIO):
 	def request_outro(self):
 		self.locals.builtins = None
 		self.locals = None
-		self.server.outtee.streams.discard(self.writer)
-		self.server.errtee.streams.discard(self.writer)
+		self.server.outtee.discard(self.writer)
+		self.server.errtee.discard(self.writer)
 		self.writer = None
 		self.stream_files_remove()
 		return
