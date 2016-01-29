@@ -53,7 +53,10 @@ class StreamTee(object):
 				getattr(stream, name)(*args, **kwargs)
 			except TypeError:
 				try:
-					getattr(stream, name)(*[unicode(item) for item in args], **{key: unicode(value) for key, value in kwargs.items()})
+					getattr(stream, name)(
+						*[unicode(item, encoding=self.target.encoding) for item in args],
+						**{key: unicode(value, encoding=self.target.encoding) for key, value in kwargs.items()}
+					)
 				except:
 					self.target.write('-' * 40 + '\n')
 					self.target.write(traceback.format_exc())
