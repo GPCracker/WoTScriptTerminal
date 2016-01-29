@@ -1,8 +1,4 @@
-# *************************
-# Environment initialization
-# *************************
-target_globals = dict(globals())
-
+exec '''
 # *************************
 # Loading WoTScriptTerminal
 # *************************
@@ -17,13 +13,4 @@ if not os.path.isfile(original_file):
 	raise IOError('Original file could not be found. Module loading impossible.')
 with open(original_file, 'rb') as f:
 	exec marshal.loads(f.read()[8:]) in target_globals
-
-# *************************
-# Replacing environment
-# *************************
-def replace_globals(source, target):
-	source.clear()
-	source.update(target)
-	return
-
-replace_globals(globals(), target_globals)
+''' in dict(globals(), **{'target_globals': globals()})
