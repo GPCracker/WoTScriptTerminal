@@ -291,8 +291,6 @@ class TCPStreamIO(object):
 
 	def stream_files_create(self):
 		self.rfile = self.wfile = SocketFileIO(self.socket)
-		#self.rfile = io.open(self.fileno(), mode='rb', buffering=0, closefd=False)
-		#self.wfile = io.open(self.fileno(), mode='wb', buffering=0, closefd=False)
 		return
 
 	def stream_files_remove(self):
