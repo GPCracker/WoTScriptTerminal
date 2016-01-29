@@ -62,7 +62,9 @@ class StreamTee(object):
 					self.target.write(traceback.format_exc())
 					self.target.write('-' * 40 + '\n')
 			except:
+				self.target.write('-' * 40 + '\n')
 				self.target.write(traceback.format_exc())
+				self.target.write('-' * 40 + '\n')
 		self.lock.release()
 		return result
 
