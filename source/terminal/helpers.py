@@ -1,4 +1,12 @@
+# *************************
+# Python
+# *************************
 import traceback
+
+# *************************
+# Package
+# *************************
+# Nothing
 
 class Event(object):
 	def __init__(self, delegates=None):

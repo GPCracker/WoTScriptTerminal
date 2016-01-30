@@ -1,6 +1,14 @@
+# *************************
+# Python
+# *************************
 import io
 import errno
 import socket
+
+# *************************
+# Package
+# *************************
+# Nothing
 
 class SocketFileIO(object):
 	recv_chunk_size = 8192

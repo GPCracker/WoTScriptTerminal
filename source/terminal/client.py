@@ -1,6 +1,12 @@
+# *************************
+# Python
+# *************************
 import io
 import sys
 
+# *************************
+# Package
+# *************************
 from .sockets import ThreadCaller, TCPStreamClient, TCPStreamIO, TCPFrameIO
 
 class TerminalClient(TCPStreamClient, TCPStreamIO, TCPFrameIO, ThreadCaller):

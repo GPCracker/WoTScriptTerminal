@@ -1,3 +1,6 @@
+# *************************
+# Python
+# *************************
 import io
 import sys
 import types
@@ -6,6 +9,9 @@ import linecache
 import threading
 import traceback
 
+# *************************
+# Package
+# *************************
 from .sockets import TCPStreamServer, TCPStreamHandler, TCPStreamIO, TCPFrameIO
 
 class StreamTee(object):

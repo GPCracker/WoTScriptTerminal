@@ -1,3 +1,6 @@
+# *************************
+# Python
+# *************************
 import io
 import sys
 import errno
@@ -7,6 +10,9 @@ import struct
 import threading
 import traceback
 
+# *************************
+# Package
+# *************************
 from .stream import SocketFileIO
 
 class ThreadCaller(object):
