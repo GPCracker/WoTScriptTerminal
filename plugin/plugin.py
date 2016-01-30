@@ -14,8 +14,8 @@ import sublime_plugin
 # *************************
 # WoTScriptTerminal
 # *************************
-from WoTScriptTerminal.helpers import Event
-from WoTScriptTerminal.client import TerminalClient
+from WoTScriptTerminal.lib.helpers import Event
+from WoTScriptTerminal.lib.client import TerminalClient
 
 # *************************
 # Globals
