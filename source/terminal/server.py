@@ -3,7 +3,9 @@
 # *************************
 import io
 import sys
+import zlib
 import types
+import marshal
 import functools
 import linecache
 import threading
@@ -155,22 +157,20 @@ class TerminalHandler(TCPStreamHandler, TCPStreamIO, TCPFrameIO):
 		return
 
 	def request_serve(self):
-		filename = '{0[0]}:{0[1]}'.format(self.client_address)
 		while True:
 			binary_data = self.recv_frame()
 			if not binary_data:
 				break
-			script = binary_data.decode(self.encoding)
+			filename, script = marshal.loads(zlib.decompress(binary_data))
 			linecache.cache[filename] = None, None, list(map(lambda line: line + '\n', script.split('\n'))), None
 			try:
-				exec(compile(script, filename, 'exec'), self.locals)
+				exec(compile(script, filename.encode(errors='ignore'), 'exec'), self.locals)
 			except:
 				try:
 					exc_type, exc_value, exc_traceback = sys.exc_info()
 					sys.stderr.write(''.join(traceback.format_exception(exc_type, exc_value, exc_traceback.tb_next)).join(['-' * 40 + '\n'] * 2))
 				finally:
 					exc_type = exc_value = exc_traceback = None
-			del linecache.cache[filename]
 		return
 
 	def request_outro(self):
