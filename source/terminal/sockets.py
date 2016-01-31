@@ -7,6 +7,8 @@ import errno
 import select
 import socket
 import struct
+import weakref
+import functools
 import threading
 import traceback
 
@@ -16,6 +18,10 @@ import traceback
 from .stream import SocketFileIO
 
 class ThreadCaller(object):
+	@staticmethod
+	def getMethodProxy(method, *args, **kwargs):
+		return functools.partial(weakref.proxy(method.im_func), weakref.proxy(method.im_self), *args, **kwargs)
+
 	@staticmethod
 	def call_in_thread(group=None, target=None, name=None, args=(), kwargs=None, daemon=False):
 		thread = threading.Thread(group=group, target=target, name=name, args=args, kwargs=kwargs)
