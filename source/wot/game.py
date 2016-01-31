@@ -2,7 +2,7 @@ exec '''
 # *************************
 # Loading WoTScriptTerminal
 # *************************
-import WoTScriptTerminalLoader
+import WoTScriptTerminal
 
 # *************************
 # Loading original module

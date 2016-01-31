@@ -22,7 +22,7 @@ import debug_utils
 # *************************
 # ScriptTerminal Library
 # *************************
-from WoTScriptTerminal.server import TerminalHandler, TerminalController
+from .terminal.server import TerminalHandler, TerminalController
 
 # *************************
 # Globals
