@@ -281,6 +281,7 @@ class TCPStreamClient(object):
 
 	def client_disconnect(self):
 		try:
+			self.client_address = None
 			self.socket.shutdown(socket.SHUT_WR)
 		except socket.error:
 			pass
