@@ -16,6 +16,7 @@ from .sockets import TCPStreamServer, TCPStreamHandler, TCPStreamIO, TCPFrameIO
 
 class StreamTee(object):
 	def __init__(self, target, streams=None):
+		super(StreamTee, self).__init__()
 		self.target = target
 		self.lock = threading.Lock()
 		self.streams = streams if streams is not None else set()
@@ -183,6 +184,7 @@ class TerminalHandler(TCPStreamHandler, TCPStreamIO, TCPFrameIO):
 
 class TerminalController(object):
 	def __init__(self, *args, **kwargs):
+		super(TerminalController, self).__init__()
 		self.server = TerminalServer(*args, **kwargs)
 		self.server.setup()
 		self.server.launch()

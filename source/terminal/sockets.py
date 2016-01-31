@@ -47,6 +47,7 @@ class TCPStreamServer(ThreadCaller):
 		return
 
 	def __init__(self, server_address, handler_class):
+		super(TCPStreamServer, self).__init__()
 		self.server_address = server_address
 		self.handler_class = handler_class
 		self.socket = None
@@ -195,6 +196,7 @@ class TCPStreamHandler(object):
 	disable_nagle_algorithm = False
 
 	def __init__(self, socket, client_address, server):
+		super(TCPStreamHandler, self).__init__()
 		self.socket = socket
 		self.client_address = client_address
 		self.server = server
@@ -234,6 +236,7 @@ class TCPStreamClient(object):
 	disable_nagle_algorithm = False
 
 	def __init__(self, server_address):
+		super(TCPStreamClient, self).__init__()
 		self.server_address = server_address
 		self.client_address = None
 		self.socket = None
@@ -297,6 +300,7 @@ class TCPStreamClient(object):
 
 class TCPStreamIO(object):
 	def __init__(self, *args, **kwargs):
+		super(TCPStreamIO, self).__init__()
 		self.rfile = None
 		self.wfile = None
 		return
