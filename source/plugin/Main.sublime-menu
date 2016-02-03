@@ -35,6 +35,19 @@
 		"id": "script_terminal",
 		"children": [
 			{
+				"caption": "Run WoT client",
+				"command": "script_terminal_run_game"
+			},
+			{
+				"caption": "Run WoT replay",
+				"command": "script_terminal_run_replay"
+			},
+			{
+				"caption": "Close WoT client",
+				"command": "script_terminal_close_game"
+			},
+			{"caption": "-"},
+			{
 				"caption": "Connect to WoT",
 				"command": "script_terminal_connect"
 			},

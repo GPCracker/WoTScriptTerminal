@@ -34,6 +34,11 @@ class ViewController(object):
 		view.set_read_only(read_only)
 		return
 
+	@staticmethod
+	def create_quick_panel(window, items, on_done, *args, **kwargs):
+		window.show_quick_panel(items, on_done, *args, **kwargs)
+		return
+
 	def __init__(self):
 		super(ViewController, self).__init__()
 		self.views = dict()

@@ -3,5 +3,10 @@
 	"server_port": 9999,
 	"save_locals": true,
 	"fetch_logs": true,
-	"show_output": true
+	"show_output": true,
+	"game_path": "C:\\Program Files\\World of Tanks\\",
+	"replay_regex": "^.+\\.wotreplay$",
+	"replay_paths": [
+		"C:\\Program Files\\World of Tanks\\replays\\"
+	]
 }

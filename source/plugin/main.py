@@ -2,7 +2,12 @@
 # Python 3
 # *************************
 import os
+import re
+import sys
 import uuid
+import traceback
+import subprocess
+import xml.etree.ElementTree
 
 # *************************
 # SublimeText
@@ -52,19 +57,88 @@ class TerminalSettings(WoTScriptTerminal.sublime.settings.Settings):
 		'save_locals': True,
 		'fetch_logs': True,
 		'show_output': True,
-		'client_uuid': str(uuid.uuid4())
+		'client_uuid': str(uuid.uuid4()),
+		'game_path': 'C:\\Program Files\\World of Tanks\\',
+		'replay_regex': '^.+\\.wotreplay$',
+		'replay_paths': [
+			'C:\\Program Files\\World of Tanks\\replays\\'
+		]
 	}
 
 	def __init__(self, base_name):
 		return super(TerminalSettings, self).__init__(base_name, self.defaults)
 
 class ScriptTerminal(WoTScriptTerminal.sublime.views.ViewController, WoTScriptTerminal.terminal.terminal.ScriptTerminal):
+	@staticmethod
+	def join_path(*args, **kwargs):
+		path = os.path.normpath(os.path.join(*args, **kwargs))
+		return path + (os.sep if os.path.isdir(path) else '')
+
+	@classmethod
+	def replays_iterator(sclass, paths, regex=r'^.+\.wotreplay$'):
+		regex = re.compile(regex)
+		for path in paths:
+			for root, dirs, files in os.walk(path):
+				for rfile in files:
+					if regex.match(rfile):
+						yield sclass.join_path(root, rfile)
+		return
+
+	@staticmethod
+	def get_game_version(version_path):
+		version = '<unknown version>'
+		if os.path.isfile(version_path):
+			try:
+				version = xml.etree.ElementTree.parse(version_path).getroot().find('./version').text.replace(' ', '')[2:]
+			except:
+				pass
+		return version
+
 	def __init__(self, settings):
 		super(ScriptTerminal, self).__init__()
+		self.process = None
 		self.settings = settings
 		self.uuid = self.settings.setdefault('client_uuid')
 		self.settings.save()
 		return
+
+	def get_replays(self, replay_paths, replay_regex):
+		try:
+			result = [[os.path.basename(replay), replay] for replay in self.replays_iterator(replay_paths, replay_regex)]
+		except:
+			sys.stderr.write('-' * 40 + '\n')
+			sys.stderr.write(traceback.format_exc())
+			sys.stderr.write('-' * 40 + '\n')
+			result = []
+		return result
+
+	def start_game(self, game_path, replay_path=None):
+		try:
+			self.process = subprocess.Popen(
+				args=(game_path, ) if replay_path is None else (game_path, replay_path),
+				cwd=os.path.dirname(game_path)
+			)
+			result = True
+		except:
+			sys.stderr.write('-' * 40 + '\n')
+			sys.stderr.write(traceback.format_exc())
+			sys.stderr.write('-' * 40 + '\n')
+			result = False
+		return result
+
+	def close_game(self):
+		try:
+			self.process.kill()
+			result = True
+		except:
+			sys.stderr.write('-' * 40 + '\n')
+			sys.stderr.write(traceback.format_exc())
+			sys.stderr.write('-' * 40 + '\n')
+			result = False
+		return result
+
+	def is_game_started(self):
+		return self.process is not None and self.process.poll() is None
 
 	def log_update_views(self, string):
 		return self.update_views('script_terminal_update_log_view', string, 'wot_python_log' if self.settings['show_output'] else None)
@@ -88,6 +162,55 @@ class ScriptTerminalListener(sublime_plugin.EventListener):
 # *************************
 # Sublime Commands
 # *************************
+class ScriptTerminalRunGameCommand(sublime_plugin.ApplicationCommand):
+	def run(self, replay_path=None):
+		global terminal
+		game_path = terminal.join_path(terminal.settings['game_path'], 'WorldOfTanks.exe')
+		version_path = terminal.join_path(terminal.settings['game_path'], 'version.xml')
+		version = terminal.get_game_version(version_path)
+		sys.stdout.write('WoT client ({0}): {1}\n'.format(version, game_path))
+		if replay_path is not None:
+			sys.stdout.write('Replay: {0}\n'.format(replay_path))
+		result = terminal.start_game(game_path, replay_path)
+		message = 'WoT client started.' if result else 'WoT client failed to start.'
+		sublime.status_message(message)
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None and not terminal.is_game_started()
+
+class ScriptTerminalRunReplayCommand(sublime_plugin.WindowCommand):
+	def run(self):
+		global terminal
+		items = terminal.get_replays(terminal.settings['replay_paths'], terminal.settings['replay_regex'])
+		terminal.create_quick_panel(
+			self.window,
+			items,
+			lambda index: (self.window.run_command(
+				'script_terminal_run_game',
+				{'replay_path': items[index][1]}
+			) if index >= 0 else None)
+		)
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None and not terminal.is_game_started()
+
+class ScriptTerminalCloseGameCommand(sublime_plugin.ApplicationCommand):
+	def run(self):
+		global terminal
+		if sublime.ok_cancel_dialog('Are you really want to close WoT client?', 'Close WoT'):
+			result = terminal.close_game()
+			message = 'WoT client was successfully closed.' if result else 'WoT client failed to be closed.'
+			sublime.status_message(message)
+		return
+
+	def is_enabled(self):
+		global terminal
+		return terminal is not None and terminal.is_game_started()
+
 class ScriptTerminalConnectCommand(sublime_plugin.ApplicationCommand):
 	def run(self, server_address=None):
 		global terminal
